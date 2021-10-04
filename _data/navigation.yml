@@ -2,8 +2,8 @@
 main:
   - title: "About"
     url: /about/
-  - title: "Baekjoon"
-    url: /Algorithm/
+  - title: "Category"
+    url: /category/
   # - title: "Sample Collections"
   #   url: /collection-archive/
   # - title: "Sitemap"

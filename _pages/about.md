@@ -5,7 +5,7 @@ excerpt: "About YOUL"
 search: true
 last_modified_at: 2021.10.03
 toc: true
-toc-sticky: true
+toc_sticky: true
 ---
 ## Profile
 <center><img src="../assets/images/youl.jpg" width="30%" height="30%" style="
