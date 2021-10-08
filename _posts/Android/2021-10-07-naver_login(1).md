@@ -13,7 +13,7 @@ tag:
 
 last_modified_at: 2021-10-07
 toc: true
-toc_sticky: ture
+toc_sticky: true
 search: true
 ---
 
