@@ -356,7 +356,7 @@ class CalendarAdapter(context: Context, days: ArrayList<Date>, eventDays: HashSe
 끝! ~(˘▾˘~)
 
 
-## ✍ GIR REPO
+## ✍ GIT REPO
 * [https://github.com/915dbfl/youlAndroid](https://github.com/915dbfl/youlAndroid)
 
 ## 📃참고
