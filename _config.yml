@@ -21,7 +21,7 @@ title_separator          : "-"
 subtitle                 : # site tagline that appears below site title in masthead
 name                     : "Yuri Mun"
 description              : "Records that present me ꔷ̑◡ꔷ̑"
-url                      : "https://915dbfl.github.io"
+url                      : "https://915dbfl.github.io/"
 baseurl                  : # the subpath of your site, e.g. "/blog"
 repository               : "915dbfl/915dbfl.github.io"
 teaser                   : # path of fallback teaser image, e.g. "/assets/images/500x300.png"
