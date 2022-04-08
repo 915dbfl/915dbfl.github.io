@@ -145,6 +145,69 @@ fun main() {
 
 <br>
 
+# 🙄연산자 오버로딩
+
+이번 시간에 배운 extension을 이용해서 연산자 오버로딩도 진행할 수 있다.
+간단한 내용이기에 이번 게시글에서 함께 짚고 넘어가고자 한다.
+
+우선 **오버로딩이 가능한 산술연산자**를 다음의 표를 통해서 살표보자.
+
+|expression|translated to|
+|----------|-------------|
+|+a|a.unaryPlus()|
+|-a|a.unaryMinus()|
+|!a|a.not()|
+|a++|a.inc()|
+|a--|a.dec()|
+|a+b|a.plus(b)|
+|a-b|a.minus(b)|
+|a*b|a.times(b)|
+|a/b|a.div(b)|
+|a%b|a.rem(b)|
+|a..b|a.rangeTo(b)|
+|a in b|b.contains(a)|
+|a !in b|!b.contains(a)|
+|a[i]|a.get(i)|
+|a()|a.invoke()|
+|a += b|a.plusAssign(b)|
+|a -= b|a.minusAssign(b)|
+|a *= b|a.timesAssign(b)|
+|a /= b|a.divAssign(b)|
+|a %= b|a.remAssign(b)|
+|a > b|a.compareTo(b) > 0|
+|a < b|a.compareTo(b) < 0|
+|a >= b|a.compareTo(b) >= 0|
+|a <= b|a.compareTo(b) <= 0|
+
+🙄 많아 보여도 비슷한 부분이 많아 쉽게 익힐 수 있을 것이다!
+
+<br>
+
+그렇다면 위 표에 존재하는 산술연산자를 어떻게 오버로딩하는지 한 번 살펴보자!
+예로 Point 객체를 -Point 연산이 가능하도록 하고자 한다.
+```
+data class Point(val x: Int, val y: Int)
+```
+
+* **-Point 연산**은 **unaryMinus()**를 오버로딩 함으로써 구현할 수 있다.
+  ```
+  operator fun Point.unaryMinus() = Point(-x, -y)
+  ```
+  * 연산자 오버로딩을 진행할 경우, **operator 키워드**를 사용한다.
+  * Point 객체의 extension function인 **unaryMinus()**를 정의한다.
+
+🙄간단하지 않은가? 그렇다면 사용법을 한 번 살펴보자!
+
+```
+val point = Point(10, 20)
+
+fun main() {
+   println(-point)// "Point(x=-10, y=-20)"
+}
+```
+
+<br>
+
 🙇‍♀️ 부족한 부분이 있다면 말씀해주세요! 감사합니다!
 
 ## 📃참고
@@ -153,3 +216,4 @@ fun main() {
 * <https://codechacha.com/ko/kotlin-extension-functions/>
 * <https://kotlinlang.org/docs/extensions.html#declaring-extensions-as-members>
 * <https://kotlinlang.org/docs/generics.html#variance>
+* <https://kotlinlang.org/docs/operator-overloading.html#increments-and-decrements>
