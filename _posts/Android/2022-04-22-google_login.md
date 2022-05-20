@@ -1,0 +1,194 @@
+---
+title: "[Android] Google Sign-in(1)"
+excerpt: "구글 연동 로그인 구현하기 part1"
+categories:
+  - Android
+tag:
+  - android 
+  - kotlin
+  - google sign in
+  - google login
+
+last_modified_at: 2022-04-22
+toc: true
+toc_sticky: true
+search: true
+---
+
+🙋‍♀️ 이번 시간에는 구글 연동 로그인을 사용하는 방법에 대해서 자세히 살펴보고자 한다!
+
+[구글 공식 문서](https://developers.google.com/identity/sign-in/android/start-integrating)에서 그 과정을 step by step으로 설명하고 있다! 이를 참고해 그 과정을 자세히 살펴보자!
+
+## 🙋‍♀️구글 API 콘솔 프로젝트 제작
+가장 먼저 해야 할 일은 **구글 API 콘솔 프로젝트 제작**이다.
+
+구글 프로젝트를 만들어 내가 만든 프로젝트와 **연동**을 해야 구글 로그인을 사용할 수 있게 된다.
+
+
+> [retrofit 공식 링크](https://square.github.io/retrofit/)
+
+retrofit은 **안드로이드 통신** 기능을 쉽게 개발할 수 있도록 하는 라이브러리이다. [Rest](https://gmlwjd9405.github.io/2018/09/21/rest-and-restful.html) 기반 웹 서비스를 통해서 JSON 을 검색하고 업로드 할 수 있다.
+
+
+🙄 즉, retrofit을 사용해 서버에게 데이터를 전달하거나 서버로부터 필요한 데이터를 쉽게 가져올 수 있다. 
+
+초기 안드로이드에서는 HttpClient를 통해 서버와 통신하였으나 Anroid 5.1 이후 deprecated가 되면서 retrofit이 서버 통신에 사용할 수 있는 유일한 라이브러리가 되었다.
+
+<br>
+
+## 🙋‍♀️ Retrofit 사용 방법
+
+우선 Retrofit을 사용하기 위해 필요한 요소부터 확인해보자.
+1. 응답으로 받아올 **JSON의 모델 클래스**(<u>data class</u> 사용!)
+
+2. HTTP 작업을 정의하는 인터페이스
+
+
+그렇다면 지금부터 단계별로 Retrofit 사용법을 정리해보고자 한다. 필자의 경우, **회원의 이메일과 이름**을 서버에게 넘겨주고 **회원 정보(이메일, id, 이름)**을 서버로부터 받아오는 코드를 작성하였다!
+
+----
+### 🙋‍♀️ Retrofit을 사용하기 위한 환경설정
+1. Gradle: Retrofit 라이브러리 추가!
+  ```
+      implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+      implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+  ```
+  (😊 라이브러리의 버전은 최신 버전으로 바꾸어 사용해주세요!)
+
+2. AndroidManifest: internet permission 추가!
+  ```
+    <uses-permission android:name="android.permission.INTERNET"/>
+  ```
+
+<br>
+----
+
+### 🙋‍♀️ 모델 클래스 생성하기
+모델 클래스를 생성하기 이전에 **서버로부터 받을 response의 타입**을 파악해야 한다.
+
+```
+{
+  "email": "string",
+  "userId": 0,
+  "userName": "string"
+}
+```
+위와 같은 응답을 받기 위해서 다음과 같은 모델 클래스가 필요하다.
+```
+data class UserInfo(
+    @SerializedName("userId") var userId: Int?,
+    @SerializedName("email") var email: String?,
+    @SerializedName("userName") var userName: String?
+)
+
+```
+🙄 자바에서는 모델 클래스를 작성하기 위해서는 getter와 setter 등의 추가적인 코드를 구현해줘야 한다.
+
+하지만 코틀린에서의 **data class**는 getter, setter 등의 추가적인 코드가 자동으로 생성되기 때문에 따로 구현할 필요가 없다.
+
+* ```@SerializedName```는 **프로퍼티 변수명**을 **실제 서버에서 사용하는 값**과 **<u>달리</u>** 할 때 사용할 수 있다. 하지만 혹시 모를 오류를 위해서 서버에서 사용하는 값과 동일한 값을 사용하더라도 해당 어노테이션을 붙여주는 것이 안전하다.
+
+<br>
+---
+
+### 🙋‍♀️ Retrofit Interface 생성하기
+```
+interface ApiInterface {
+
+    @POST("v1/user")
+    fun addUser(@Body userData: UserInfo): Call<UserInfo>
+
+    companion object{
+        var BASE_URL = "🌟서버의 기본 URL 주소🌟"
+
+        fun create(): ApiInterface{
+            val retrofit = Retrofit.Builder()
+                .addConverterFactory(GsonConverterFactory.create())
+                .baseUrl(BASE_URL)
+                .build()
+            return retrofit.create(ApiInterface::class.java)
+        }
+    }
+}
+```
+1. **HTTP annotation**
+
+    🙄 위에서는 ```@POST```를 사용해 POST 메소드를 작성하고 있다. 이외에 ```HTTP, GET, PUT, PATCH, DELETE, OPTIONS, HEAD```의 어노테이션을 사용할 수 있다. 
+
+    이번 게시글에서는 **POST 메소드**를 위주로 살펴보고자 한다! 자세한 내용은 [공식문서](https://square.github.io/retrofit/)를 확인하길 바란다!
+
+<br>
+
+2. **request body**
+  ```
+      @POST("v1/user")
+      fun addUser(🔔@Body userData: UserInfo): Call<UserInfo>
+  ```
+  만약 서버 요청 시 **request body**가 필요하다면 위와 같이 ```@Body```를 통해서 지정해줄 수 있다!
+
+<br>
+
+3. **@POST("v1/user")**
+
+    여기 작성하는 주소를 통해서 최종적으로 ```BASE_URL/v1/user```가 요청 주소가 되는 것이다!
+
+<br>
+
+4. **@Path: 주소 조작!**
+
+    서버 요청 주소가 일관되지 않고 <u>특정 값에 따라 달라질 때</u>는 **@Path**를 사용할 수 있다.
+
+    ```"v1/user/{id}"```가 요청 주소가 될 때는 다음과 같이 POST 메소드를 작성할 수 있다.
+    ```
+          @POST("v1/user/{id}")
+          fun addUser(@Path("id")id: Int): Call<UserInfo>
+    ```
+
+<br>
+---
+
+### 🙋‍♀️ 서버 요청/응답
+```
+        ApiInterface.create().checkUser(userInfo).enqueue(
+            object : retrofit2.Callback<userInfo>{
+                override fun onResponse(call: Call<Data>, response: Response<Data>) {
+                    if(response.isSuccessful){
+                        userInfo = response.body()!!.user
+                        oauthInfo = response.body()!!.oauth
+                        val data = Data(oauthInfo, userInfo)
+                        gotoMain(data)
+                    }else{
+                        if(response.code() == 404){
+                            Toast.makeText(context, "회원 가입을 먼저 진행해주세요!😊", Toast.LENGTH_SHORT).show()
+                        }
+                        Log.d("response", "responseCode: ${response.code()}")
+                    }
+                }
+
+                override fun onFailure(call: Call<Data>, t: Throwable) {
+                    Log.d("postApi", "error: ${t.toString()}")
+                }
+            }
+        )
+```
+* ApiInterface.create()로 Retrofit 객체 가져온다.
+* **enqueue()**로 Retrofit은 서버와 비동기로 통신하게 된다.
+* 서버에서 전달받은 **응답**은 **response**에 저장되게 된다.
+  * **response.body()**를 통해서 값에 접근할 수 있다.
+* request body로 email과 이름이 필요하므로 위에서 작성한 UserInfo 데이터 클래스를 넘겨주었다.
+
+  🔔여기서 잠깐!🔔
+
+  * userInfo는 userId, email, userName으로 구성된 data class인데 **userId는 무슨 값을 넣어서 보내줘야 할까??**
+    * 서버 요청을 위해 필요한 값은 email과 userName이다. 따라서 userId 부분은 **nullable**로 설정해 **null값을 넣고 넘겨주면 된다.**
+
+
+## 📃참고
+* <https://square.github.io/retrofit/>
+* <https://howtodoandroid.com/retrofit-android-example-kotlin/>
+* <https://s2choco.tistory.com/28>
+* <https://stackoverflow.com/questions/30180957/send-post-request-with-params-using-retrofithttps://question0.tistory.com/12>
+* <https://velog.io/@ptm0304/Kotlin-Retrofit-POST-pok3a6b8a8>
+* <https://stickode.tistory.com/43>
+* <https://medium.com/androiddevelopers/31daysofkotlin-week-2-recap-9eedcd18ef8>
+* <https://cishome.tistory.com/137>
