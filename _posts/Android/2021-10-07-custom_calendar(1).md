@@ -1,6 +1,6 @@
 ---
-title: "[Android/Calendar] 커스텀 캘린더 구현(1): 이번 달 출력하기"
-excerpt: "GridView 사용해 이번 달 출력하기!"
+title: "[Android] 커스텀 캘린더 구현(1): GridView"
+excerpt: "GridView 사용해 커스텀 캘린더 구현!"
 categories:
   - Android
 tag:
@@ -9,6 +9,7 @@ tag:
   - 안드로이드 달력
   - 커스텀 달력
   - android calendar
+  - gridview custom calendar
 
 last_modified_at: 2021-10-10
 toc: true
@@ -155,9 +156,6 @@ android:layout_height="match_parent">
 
 해당 게시글에서는 코드의 중요 부분별로 나눠 설명을 진행하겠다!
 
-전체 소스코드는 링크된 [깃 레포](https://github.com/915dbfl/youlAndroid)를 참고하길 바란다.
-
-
 <br>
 
 ### 👩‍💻CalendarView
@@ -230,10 +228,6 @@ android:layout_height="match_parent">
       * gridView의 행이 **가장 많은 경우**는 달의 1일이 **첫 주의 토요일부터 시작하는 경우**이다.
       * 그럴 경우, 달력에는 총 **6행 7열**의 칸이 필요하게 되므로 cell의 최대값은 42가 된다.
 
-    아래 그림을 함께 참고한다면 위 설명이 보다 잘 이해가 될 것이다!
-
-    ![달력계산](https://ifh.cc/g/8Cwml8.jpg)
-
     <br>
 
 ## 👩 Adapter 구현
@@ -248,7 +242,7 @@ android:layout_height="match_parent">
 <br>
 
 👩 어댑터에 대해서 조금 더 제사한 내용을 알아보고 싶다면 [안드로이드 어댑터 공식 문서](https://developer.android.com/reference/android/widget/Adapter#constants)를 참고하길 바란다.
-  * getView()에 대한 내용도 참고하면 도움이 될 것 것이다.
+  * getView()에 대한 내용도 참고하면 도움이 될 것이다.
 
 
 <br>
@@ -340,18 +334,84 @@ class CalendarAdapter(context: Context, days: ArrayList<Date>, eventDays: HashSe
 
 <br>
 
-여기까지 진행한다면 다음과 같은 결과를 얻을 수 있을 것이다!!
+## ➕ 이전/다음 달 출력하기!
 
-![캘린더결과](https://ifh.cc/g/0v8Ur3.png)
+위에서 작성한 updateCalendar 함수에 제공하는 달력의 날짜를 조정한다면 이전 달과 다음 달도 쉽게 출력할 수 있다!!
+
+우선 현재 달력의 년도(year)와 달(month)의 값이 필요하다.
+이것만 알고 있다면 이전 달을 구하는 것은 쉽다!!!
+
+
+```
+private fun gotoPastMonth(){
+    val calInstance = Calendar.getInstance()
+    calInstance.set(Calendar.YEAR, year)
+    calInstance.set(Calendar.MONTH, month)
+    calInstance.add(Calendar.MONTH, -1)
+    updateCalendar(calInstance, chosenD)
+}
+```
+* 코드를 통해서도 알 수 있듯이 현재 달력과 동일한 년도와 달을 가리키는 Calendar instance를 하나 생성한다.
+* month에 -1을 해줌으로써 인스턴스가 이전 달을 가리키도록 한다.
+* updateCalendar에 해당 인스턴스를 제공해준다.
+
+다음 달을 구하는 방식도 위와 동일하므로 코드만 한 번 살펴보자!
+
+```
+private fun gotoNextMonth(){
+    val calInstance = Calendar.getInstance()
+    calInstance.set(Calendar.YEAR, year)
+    calInstance.set(Calendar.MONTH, month)
+    calInstance.add(Calendar.MONTH, 1)
+    updateCalendar(calInstance, chosenD)
+}
+```
 
 <br>
+
+## ➕뷰 클릭 이벤트 적용하기
+
+달력의 각 **뷰에 클릭리스너를 달아** 클릭 시 동작을 정의할 수 있다!
+
+뷰의 클릭 리스너는 어댑터의 **getView** 메소드로 넘어오는 파라미터 view를 통해서 정의하면 된다!
+
+```
+override fun getView(position: Int, view: View?, parent: ViewGroup): View {
+
+    view.setOnClickListener {
+      ...
+    }
+}
+```
+
+<br>
+
+## ➕ gridView 아이템 업데이트
+
+달력의 **아이템 view들을 업데이트**하고 싶은 경우도 있을 것이다.
+
+gridView의 아이뎀을 업데이트하고자 한다면 **전체 아이템을 업데이트하는 방식**을 사용해야 한다.
+
+그 코드는 다음과 같다!!
+
+```
+notifyDataSetChange()
+```
+
+🔔다만 여기서 주의할 점이 있다. 해당 코드를 통해서 캘린더뷰가 업데이트 되게 하기 위해서는 **캘린더뷰의 어댑터**에 대해서 해당 코드를 작성해야 한다.
+
+해당 어댑터 클래스 내에서 **'notifyDataSetChanged'**를 사용하거나 **'(캘린터 뷰).adapter.notifyDataSetChanged'**를 사용해야 한다는 것이다.
+
+<br>
+---
+
+지금까지 GridView를 이용해 커스텀 캘린더를 구현하는 방식에 대해 알아보았다.
 
 히히..좀 뿌듯하지 않은가?
 ~~(필자는 좀 많이 뿌듯하다!)~~
 
-그렇다면 일!단! 이번 달 출력은 성공이다!🙌
 
-이번 게시글은 여기서
+그렇다면 이번 게시글은 여기서
 
 끝! ~(˘▾˘~)
 
