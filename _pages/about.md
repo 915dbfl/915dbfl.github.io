@@ -21,3 +21,6 @@ padding: 5px;
 * MAJOR: Computer Science Engineering
 * description: "<u>Do, youl!</u> 실패를 두려워하지 않고 부딪힐 수 있는 강한 개발자가 되고 싶습니다."
 
+
+## 🌱Projects
+* [For Your Day](https://www.notion.so/For-Your-Day-f4044e889d044271805824a90cc92412)
