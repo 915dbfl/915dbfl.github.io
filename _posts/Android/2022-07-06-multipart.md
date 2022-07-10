@@ -114,6 +114,10 @@ HTTP Request Body에 들어가는 데이터는 **한 종류** 타입이 대부�
   ```kotlin
   val requestBody = RequestBody.create("multipart/form-data".toMediaTypeOrNull(), file)
   ```
+    * 여기서 잠깐!! `create(MediaType?, File)`의 deprecated를 해결하기 위해서는 다음 코드를 사용하면 된다!
+      ```kotlin
+      val requestBody = file.asRequestBody("multipart/form-data".toMediaTypeOrNull())
+      ```
   * POST 요청시 필요한 **Multipart.Part**로 변환한다.
   ```kotlin
   val multipartBody = MultipartBody.Part.createFormData("file", file.name, requstBody)
