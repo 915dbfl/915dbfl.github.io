@@ -114,6 +114,78 @@ search: true
 
 <BR>
 
+## 🙋‍♀️ let 함수
+* 널이 **될 수 있는 값**을 널이 **아닌** 값만 인자로 받는 함수에 넘기는 경우이다.
+  * 널이 **될 수 있는 값**에 대해 **안전한 호출 구문**을 사용한다.
+  * let을 호출한다.
+  * 널이 될 수 **없는** 타입을 인자로 받는 **람다**를 let에 전달한다.
+* 아주 긴 식이 있고, 그 값이 **널이 아닐 때** 수행해야 하는 로직이 있을 때 let을 쓰면 편리하다.
+
+  ```kotlin
+    email?.let{
+      sendEmailTo(it)
+    }
+  ```
+  * email이 널이 아니라면 it은 람다 안에서 널이 아니다.
+  * email이 널이라면 <u>아무 일도 일어나지 않는다.</u>
+
+  
+  🙄 그렇다면 <u> 안전한 호출을 사용하지 않으면</u> 어떻게 될까?
+
+  ```kotlin
+    person.let {sendEmailTo(it)}
+  ```
+  * let 함수에 넘겨지는 람다 속 **it은 널이 될 수 있는 타입**으로 취급된다.
+
+  <br>
+
+  ## 🙋‍♀️ lateinit: 나중에 초기화
+
+  * 코틀린은 일반적으로 **생성자**에서 모든 프로퍼티를 **초기화**해야 한다.
+
+  🙄 다음의 경우를 한 번 살펴보자!
+
+  ```kotlin
+    class MyService{
+      fun performAction(): String = "foo"
+    }
+
+    class MyTest{
+      private var myService: MyService? = null // 생성자에서 초기화하기 위해 널이 될 수 있는 타임으로 선언 후, null로 초기화한다.
+
+      @Before fun setUp(){
+        myService = MyService() // 진짜 초기값을 지정
+      }
+    }
+  ```
+  위에서 볼 수 있듯이 생성자에서 초기화를 진행해야 하기 때문에 null을 통해 초기화를 우선 지정하는 경우가 많다. 하지만 이러한 코드는 보기에 안좋기 때문에 이를 해결하기 위해 사용하는 것이 **lateinit** 변경자이다.
+  * lateinit 프로퍼티는 **var**이어야 한다.
+    * **val**의 경우, <u>final 필드로 컴파일</u>되기 때문에 반드시 **생성자 안**에서 초기화해야 한다.
+
+  <br>
+
+  ## 🙋‍♀️ ?가 없어도 널이 될 수 있는 타입이 아니다!
+
+  * 널이 될 수 있는 타입의 확장 함수로 `isNullOrEmpty`, `isNullOrBlack` 메서드가 있다.
+
+  ```kotlin
+    fun verifyUserInput(input: String?){
+      if(input.isNullOrBlank()){ // 안전한 호출을 하지 않아도 된다.
+        println("...")
+      }
+    }
+  ```
+  그렇다면 String의 isNullOrBlank 확장 함수를 자세히 살펴보자!
+
+  ```kotlin 
+    fun String?.isNullOrBlank(): Boolean =
+      this == null || this.isBlank()
+  ```
+  * 자바의 경우, 메서드 안 this는 메서드가 호출된 수신 객체를 가리키므로 항상 **널이 아니다.**
+  * 코틀린에서는 **널이 될 수 있는 타입의 확장 함수 안**에서는 this가 널이 될 수 있다.
+
+  <br>
+
 🙇‍♀️ 부족한 부분이 있다면 말씀해주세요! 감사합니다!
 
 ## 📃참고
