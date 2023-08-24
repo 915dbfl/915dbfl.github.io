@@ -71,7 +71,7 @@ jobs:
 ```kotlin
   test:
     needs: build # build에 종속성을 갖게 된다. 즉, build job이 끝난 후 실행된다.
-    runs-on: macos-latest # 필자는 mac을 사용하고 있으므로 macos 환경에서 실행되도록 한다.
+    runs-on: ubuntu-latest
     steps:
 
     # 위에서 말했듯이 각각의 job은 독립적이다. 따라서 checkout과 jdk 설정을 별도로 다시 진행한다.
@@ -122,6 +122,41 @@ jobs:
 우선, 종속성에 따라 job들이 이어진 형태를 확인할 수 있을 것이다! 그리고 만약 모든 job들이 성공적으로 build된다면 아래와 같이 test에 대한 report를 확인할 수 있을 것이다.
 
 <img src = "https://drive.google.com/uc?id=15wgRkF8U3TFBQPcwmNxgT70QsJh41H_J">
+
+<br>
+
+# 👩🏻‍💻 github action을 활용한 auto merge
+
+이제 마지막 단계이다. github action을 이용해 auto merge를 진행할 것이다.
+
+```kotlin
+# 1. build-and-test가 마무리되어야 merge 작업이 진행된다.
+# 2. pull-reqest를 생성하고, 파일을 변경하는 작업이 필요하므로
+     필요한 permission을 설정해준다.
+     checkout의 경우, 워크플로우로 코드를 가져와 병합하기 위해 필요하다.
+# 3. merge를 진행한다.
+
+  merge-branch:
+    permissions:
+      checks: write
+      contents: write
+      pull-requests: write
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Merge staging -> develop
+        uses: devmasx/merge-branch@master
+        with:
+          type: now
+          target_branch: 'develop'
+          message: Merge staging -> develoop
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+```
+
+여기서 `GITHUB_TOKEN`의 경우, 단순 발급만 하면 <span style = "background-color:#fff5b1">별도로 secret을 설정하지 않고 `secrets.GITHUB_TOKEN`으로 접근해 사용할 수 있다.</span>
+
+<br>
 
 # 🤔 추가정리
 
