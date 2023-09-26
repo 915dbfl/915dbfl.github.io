@@ -215,9 +215,17 @@ class TasksViewModelTest {
 LiveData를 test하기 위해서는 크게 두가지 작업을 진행해야 한다. <span style = "background-color:#fff5b1">1. InstantTaskExecutorRule 사용, 2. LiveData observation</span>. 그렇다면 우선 InstantTaskExecutorRule이 하는 역할에 대해 알아보자!
 
 ## ✓InstantTaskExecutorRule
+
+우선 `InstantTaskExecutorRule`를 사용하지 않고 LiveData를 테스트하게 된다면 오류가 발생하게 된다.
+* 테스트는 메인 쓰레드가 아닌 다른 쓰레드에서 실행된다.
+* LiveData의 `setValue, postValue`의 경우, 내부적으로 `assertMainThread`라는 메소드를 호출하고 있어 메인 쓰레드 아니면 예외를 발생시키기 때문이다.
+
+이때 사용할 수 있는 것이 바로 <span style = "background-color:#fff5b1">InstantTaskExecutorRule</span>이다. 이는 내부적으로 <span style = "background-color:#fff5b1">isMainThread 함수에 대해 true</span>를 반환한다.
+
+그 외 추가적인 사항은 다음과 같다.
+
 * JUnit Rule
-* <span style = "background-color:#fff5b1">@get:Rule</span>을 통해서 InstantTaskExecutorRule 클래스의 코드들이 test 이전과 이후에 실행될 수 있도록 한다. 
-*  동일한 쓰레드에서 architecture component와 관련된 백그라운드 작업이 진행돼 동기화에 신경을 쓰지 않아도 되게 된다. 따라서 <span style = "background-color:#fff5b1">livedata를 포함해 테스트를 진행하려고 한다면 rule을 사용하자!!</span>
+*  동일한 쓰레드에서 architecture component와 관련된 백그라운드 작업이 진행돼 동기화에 신경을 쓰지 않아도 되게 된다. 
 
 ```kotlin
 testImplementation "androidx.arch.core:core-testing:$archTestingVersion"
