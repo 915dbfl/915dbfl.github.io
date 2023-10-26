@@ -50,5 +50,23 @@ search: true
 
 <br>
 
+### + 추가
+
+위에서 설명했듯이 `root.findViewTreeLifecycleOwner()`를 사용하려면 viewHolder가 화면에 attach된 후에 사용해야 한다.
+
+```kotlin
+    private var Owner: LifecycleOwner? = null
+    init {
+        itemView.doOnAttach {
+            Owner = it.findViewTreeLifecycleOwner()
+            binding.lifecycleOwner = Owner
+        }
+    }
+```
+`itemView.doOnAttach`를 통해서 <sapn style = "background-color:#fff5b1">attach한 후 진행할 부분을 작성할 수 있다.</span>
+따라서 attach한 후 root의 lifecycleOwner를 가져와 binding에 lifecycleOwner로 설정해주면 liveData를 observe할 수 있게 된다.
+
+</br>
+
 ## 👩🏻‍💻 참고
 * <https://stackoverflow.com/questions/63461537/is-it-safe-to-pass-lifecycleowner-into-recyclerview-adapter>
