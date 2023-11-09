@@ -120,7 +120,14 @@ search: true
   
   자세한 사항은 다음 게시글을 참고하길 바란다!!
   * [Glide 사용법?](http://dktfrmaster.blogspot.com/2016/09/glide.html)
-  
+
+### + glide 이슈: Glide SSL Exception
+
+glide를 사용하던 중, `glide ssl exception`을 마주했다. glide의 경우, <span style = "background-color:#fff5b1">https 프로토콜을 사용하여 이미지를 가져오기 때문에</span> SSL 인증서가 적용되지 않아 해당 이슈가 발생한다는 사실을 알게 되었다.
+
+okHttpClient를 사용할 때 SSL 인증서가 없는 사이트의 경우 <span style = "background-color:#fff5b1">SSL 인증서를 검증하지 않는 `getUnsafeokHttpClient` 메소드를 적용해 일시적으로 해결할 수 있다.</span>
+
+하지만 해당 해답은 보안 상의 이슈가 발생할 수 있으므로 https 프로토콜을 사용하는 방향으로 프로젝트를 진행하는 것이 좋다.
 
 <br>
 
