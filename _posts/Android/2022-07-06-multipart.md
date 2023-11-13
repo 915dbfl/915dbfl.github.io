@@ -33,11 +33,6 @@ search: true
 😠 그래서! multipart가 도대체 뭔데!
 
 ## 🙋‍♀️ HTTP 구조
-
-<img src = "https://ifh.cc/g/GvW2RQ.png" width = 400 height = 400>
-
-위 사진은 HTTP의 구조이다.
-
 데이터를 전송할 때 HTTP **Message Body**에 들어가는 **데이터 타입**을 **HTTP Header에 명시할 수 있다.** 이 때 명시를 위해 사용되는 필드가 **Content-type**이다. 여기 명시되는 데이터 타입 중 하나가 바로 우리가 사용할 **multipart**이다.
 
 <br>
@@ -82,8 +77,6 @@ HTTP Request Body에 들어가는 데이터는 **한 종류** 타입이 대부�
 # 👩 Retrofit Multipart 통신
 
 ## 🙋‍♀️ PostMan으로 이미지 업로드
-
-<img src = "https://ifh.cc/g/7AKBk8.png" width = 600 height = 400>
 
 * 우선 서버에 **데이터를 전송**하기 위해 **POST**를 사용한다.
 * 데이터가 들어가는 Body를 **form-data type**로 선택한다.
