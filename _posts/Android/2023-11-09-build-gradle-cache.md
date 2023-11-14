@@ -13,8 +13,9 @@ toc_sticky: true
 search: true
 ---
 
-## 👩🏻‍💻 빌드 시간 장난 아니다...
-<img src = "https://drive.google.com/uc?id=11DG_RMFHDluLeF0RhmMNdP8utUG48GOH">
+## 👩🏻‍💻 늘어나는 빌드 시간...
+
+<img src = "https://drive.google.com/uc?id=1zPWnHOom0IpSUdSEYb4PkrxXhIFt4wNZ">
 
 github-action을 통해 CI를 구축한 후, 빌드를 기다리는 시간이 너무 길게 느껴졌다. 이를 조금이라도 단축할 순 없을까 고민하던 중, `build gradle cache`에 대해 알게 되어, 이를 적용하는 방법을 다뤄보고자 한다.
 
@@ -46,6 +47,18 @@ github-action에서도 반복적으로 사용되는 의존성에 대해 `캐싱`
 path: 캐시가 되는 파일 runner내 파일 경로
 key: 캐시 저장, 복원에 사용되는 키
 restore-key: 위에 설정한 key로 cache miss가 발생할 때 사용하는 후보키들
+
+## 👩🏻‍💻 결과 확인하기
+
+그렇다면 이제 결과를 비교해보자! 캐시가 적용되지 않은 상태에서 처음 캐시를 적용하는 경우 아래와 같이 
+
+<img src = "https://drive.google.com/uc?id=15w_2SNrjuqAMmwkyJsDfAql0r9MCERA4">
+
+restore할 캐시가 없다 뜨고, 마지막 캐시 작업을 완료하는 것을 확인할 수 있다. 이때 빌드가 진행되는 Unit test job을 본다면 약 <span style = "background-color:#fff5b1">6분</span>가량 소요됐다.
+
+<img src = "https://drive.google.com/uc?id=1hk4B4Uo8SlBpZ4lP8F9wp9ItjJj2ZbTR">
+
+캐시를 적용한 후다. <span style = "background-color:#fff5b1">cache restored</span>가 성공적으로 이뤄지고, 마지막으로 cache hit이 일어난 것까지 확인된다. 이때 Unit test는 약 <span style = "background-color:#fff5b1">2분</span>이 소요되었다. 즉, 약 66% 속도 향상이 된 것이다!
 
 간단한 코드지만 이를 통해 전반적인 개발 시간이 줄어든 것 같아 뿌듯하다!
 
