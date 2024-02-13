@@ -1,7 +1,6 @@
 ---
 permalink: /about/
 title: "About"
-excerpt: "About YOUL"
 search: true
 last_modified_at: 2021.10.03
 toc: true
