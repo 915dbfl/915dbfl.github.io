@@ -62,7 +62,7 @@ firebase appdistribution을 진행할 수 있는 방법은 무척 다양하다. 
 
 ### 1. Firebase Android 앱 - Google Play 개발자 계정 연결하기
 
-<img src = "https://drive.google.com/uc?id=1FyzNa_2eW2r_6y6AFR-7H9sdYik4s-PY">
+![google play](/assets/images/google%20play.png)
 
 프로젝트 설정 -> 통합에 들어가면 `Google Play 카드에서 연결`이 보일 것이다. 해당 카드를 선택해 연결을 진행하면 된다.
 
@@ -70,7 +70,8 @@ firebase appdistribution을 진행할 수 있는 방법은 무척 다양하다. 
 
 우선 github-action에서 firebase appdistribution을 진행하려면 <span style = "background-color:#fff5b1">firebase APP_ID, TOKEN</span>이 필요하다. 우선 APP_ID는 콘솔에서 쉽게 얻을 수 있다.
 
-<img src="https://drive.google.com/uc?id=1UneoHHNwbbs2Pg4D-kwvWQ_dQy82GN04">
+![app id](/assets/images/app_id.png)
+
 프로젝트 설정에 들어가면 바로 해당 앱에 대한 앱 Id를 확인할 수 있다. 이를 github-action secret으로 등록해준다.
 
 만약 github-action secret 등록하는 법이 궁금하다면 [다음 공식 홈페이지](https://docs.github.com/ko/actions/security-guides/using-secrets-in-github-actions)를 참고하길 바란다!
@@ -93,7 +94,7 @@ firebase login
 firebase projects:list
 ```
 
-<img src = "https://drive.google.com/uc?id=1bFGsFFOyluULychRfFh23wSXUL7MzFPX">
+![firebase login](/assets/images/firebase_login.png)
 
 그렇다면 이제 `firebase token`을 가져오자!
 
@@ -106,11 +107,11 @@ firebase login:ci
 ## 👩🏻‍💻 firebase의 appdistribution 사용 설정하기
 이제 사용 준비를 모두 마쳤으니 firebase 콘솔 속 원하는 프로젝트에서 `firebase appdistribution` 사용을 시작해야 한다.
 
-<img src = "https://drive.google.com/uc?id=10yIc3i3g21HsetfFJnPOGwCaYZF7M5JP">
+![app distribution](/assets/images/app_distribution.png)
 
 다음과 같이 프로젝트에서 app distribution을 클릭하면 시작하기가 나온다. 시작하기를 클린한 후, 테스트 그룹을 설정해야 한다.
 
-<img src = "https://drive.google.com/uc?id=1N7Gm6Im8__1zTu2ooL_y8SfYSLwPgxlA">
+![test group](/assets/images/test_group.png)
 
 그룹을 추가하면 그룹 옆에 <span style = "background-color:#fff5b1">작게 별칭이 나오고 해당 별칭을 명령줄 도구에서 그룹을 지정할 때 사용하라고 나와 있다.</span> 이를 사용하면 된다.
 
@@ -153,7 +154,7 @@ firebase login:ci
 ```
 해석을 해보면 firebase_token이 deprecated 되었으니 google_application_credentials를 활용하라는 말이다. 
 
-<img src = "https://drive.google.com/uc?id=1bQpqiXr0cjGoZ4pLLnQqZkUnVHydjqDU">
+![token](/assets/images/token.png)
 
 필자의 경우, google cloud에서 프로젝트에 대한 권한이 여러명 등록되어 있어 오류가 발생했었다. 소유자인 나를 제외한 나머지 구성원을 삭제하니 firebase token이 잘 인식되었다.
 
@@ -172,15 +173,15 @@ https://stackoverflow.com/questions/62385911/firebase-app-distribution-failed-to
 
     그렇다면 우선 file path가 잘 작성되었는지 확인하자. 만약 해당 path가 맞는지 잘 모르겠다면 android studio 툴을 활용해 직접 apk를 추출하고 경로를 확인하자!
 
-    <img src = "https://drive.google.com/uc?id=1KmEmR9lfWCNX1Z9DQYV9Uih4duXshlIW" height = 500>
+    ![apk](/assets/images/apk.png)
 
     build variants 클릭 -> app variant를 debug로 설정
 
-    <img src = "https://drive.google.com/uc?id=1zVX5xhUHIGysCJl66y1eACKvC3BfkLY4" width = 500>
+    ![app variant](/assets/images/app_variant.png)
 
     build -> build Bundles -> build APK(s)를 진행하면 빌등 완료 시 하단 팝업으로 locate을 확인할 수 있는 팝업이 뜨게된다. 
 
-    <img src = "https://drive.google.com/uc?id=1n6s5i-e9n7LVNW8GlF3dau6i_5bqF8Pj" width = 500>
+    ![locate](/assets/images/locate.png)
 
     폴더 속 app-debug.apk -> 우클릭 -> 정보 가져오기 -> 위치에서 우클릭 -> 경로 이름으로 복사를 진행해 경로를 확인한다.
 

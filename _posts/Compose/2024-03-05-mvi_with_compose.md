@@ -144,11 +144,11 @@ user()의 결과는 intent의 input으로 넘어가고, intent의 결과는 mode
 
 ## 🔗 MVI DeepDive 전,, Side Effect 다루기!
 
-여기서 각 개념에 대해 자세히 다루기 전에 우리는 생각할 수 있다. 
+보통 Api을 호출하거나 DB 작업을 하면 그 결과값이 model에 입력값으로 처리된다. 이때 model에 입력값으로 처리가 되면서 동시에 <span style = "background-color:#fff5b1">다른 구성 요소의 side effect가 실행될수도 있다.</span> 이러한 사이드 이펙트의 결과는 <span style = "background-color:#fff5b1">아무 것도 아니거나 새로운 intent가 될수 있다.</span>
 
-그렇다면 <span style = "background-color:#fff5b1">API를 부르거나, remote 로깅을 쏘는 등과 같은 작업은 어떻게 처리되는 걸까?</span> 
+예를 들어 Toast를 띄우거나, Logging을 쏘거나 하는 작업들은 이벤트이지만 그 결과가 없기에 상태를 변경할 필요가 없다. 이런 작업들을 sdieEffect로 따로 두어 처리를 하는 것이다.
 
-이런 것들을 `Side Effect`로 다루며, 위에서 다룬 MVI base graph에서 아래와 같이 위치하게 된다.
+`Side Effect`가 포함된 graph를 살펴보자!
 
 ```
                 ⌈---- side effects ←----
