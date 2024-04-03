@@ -216,3 +216,5 @@ RDD는 시스템의 기능을 역할과 책임을 수행하는 객체들의 협�
 
 - 견고한 객체지향 어플리케이션을 개발하기 위해 <span style = "background-color:#fff5b1">사용자의 관점에서 시스템의 기능을 명시</span>하고,
 - 사용자가 설계자가 공유하는 <span style = "background-color:#fff5b1">안정적인 구조를 기반으로 기능을 책임으로 변환</span>하는 체계적인 절차를 따라야 한다.
+
+![마인드맵](/assets/images/object_orientation.jpeg)
