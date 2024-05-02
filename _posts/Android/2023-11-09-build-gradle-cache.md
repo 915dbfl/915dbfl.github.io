@@ -56,7 +56,7 @@ restore-key: 위에 설정한 key로 cache miss가 발생할 때 사용하는 �
 
 restore할 캐시가 없다 뜨고, 마지막 캐시 작업을 완료하는 것을 확인할 수 있다. 이때 빌드가 진행되는 Unit test job을 본다면 약 <span style = "background-color:#fff5b1">6분</span>가량 소요됐다.
 
-<img src = "https://drive.google.com/uc?id=1hk4B4Uo8SlBpZ4lP8F9wp9ItjJj2ZbTR">
+![결과](/assets/images/locate.png)
 
 캐시를 적용한 후다. <span style = "background-color:#fff5b1">cache restored</span>가 성공적으로 이뤄지고, 마지막으로 cache hit이 일어난 것까지 확인된다. 이때 Unit test는 약 <span style = "background-color:#fff5b1">2분</span>이 소요되었다. 즉, 약 66% 속도 향상이 된 것이다!
 

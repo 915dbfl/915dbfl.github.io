@@ -181,8 +181,6 @@ https://stackoverflow.com/questions/62385911/firebase-app-distribution-failed-to
 
     build -> build Bundles -> build APK(s)를 진행하면 빌등 완료 시 하단 팝업으로 locate을 확인할 수 있는 팝업이 뜨게된다. 
 
-    ![locate](/assets/images/locate.png)
-
     폴더 속 app-debug.apk -> 우클릭 -> 정보 가져오기 -> 위치에서 우클릭 -> 경로 이름으로 복사를 진행해 경로를 확인한다.
 
 2. yml 파일에서 upload를 진행하기 전에 해당 파일에 접근할 수 있는 환경을 셋팅해야 한다.
