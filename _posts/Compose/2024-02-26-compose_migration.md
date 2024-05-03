@@ -61,6 +61,11 @@ android {
 
 이렇게 compose compiler만 별도의 버전으로 분리한 이유는 [다음 게시글](https://android-developers.googleblog.com/2022/06/independent-versioning-of-Jetpack-Compose-libraries.html)에서 확인할 수 있었다. kotlin 버전이 업그레이드 되면 그에 따라 compose compiler의 버전도 업그레이드 되어야 한다. 따라서 다른 compose 라이브러리와 별도로 버전을 관리하면서 조금 더 빠르게 버전 업그레이드를 하기 위해서이다. 
 
+(🔗 2024.05.03 내용 추가)
+최근 [andorid developers blog](https://android-developers.googleblog.com/2024/04/jetpack-compose-compiler-moving-to-kotlin-repository.html)에서 compose compiler가 kotlin repository로 이동했다는 게시글이 있다.
+
+따라서 kotlin `2.0.0`부터는 더 이상 `kotlinCompilerExtensionVersion`를 추가하지 않아도 되며 버전 카탈로그와 gradle에 `compose-compiler`에 대한 의존성을 추가해주면 된다. 이때 compose-compiler의 버전은 코틀린을 따라간다! 즉, 더 이상 kotlin 버전에 맞는 compose-compiler 버전을 고려하지 않아도 된다는 뜻이다.
+
 ```kotlin
     val composePlatform = platform(libs.compose.bom)
     api(composePlatform)
