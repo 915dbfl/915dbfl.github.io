@@ -24,23 +24,22 @@ search: true
 
 # 👩🏻‍💻 local vs instrumented test
 
-우선 안드로이드 스튜디오에서 첫 프로젝트를 생성하면 자동으로 다음의 세 [소스세트](https://developer.android.com/studio/build?hl=ko#sourcesets)를 확인할 수 있다.
-
-<img src = "https://drive.google.com/uc?id=10ux3_PXjBIMHdAv62J98MLUK95j2HN33" width = 500 height = 300>
+우선 안드로이드 스튜디오에서 첫 프로젝트를 생성하면 자동으로 세 [소스세트](https://developer.android.com/studio/build?hl=ko#sourcesets)를 확인할 수 있다.
 
 여기서 우리가 가장 많이 다루는 것이 바로 가장 위에 있는 소스 세트일 것이다. 그것이 바로 앱의 코드가 들어있는 main 소스세트이다. 그리고 그 밑에 있는 `androidTest`의 경우, <span style = "background-color:#fff5b1">instrumented test(계측 테스트)</span>이다. 마지막으로 단순 `test` 폴더는 <span style = "background-color:#fff5b1">local test</span>에 해당한다.
 
 그렇다면 instrumented test와 local test의 차이는 무엇일까? 이를 간단히 정리하면 다음과 같다.
 
 * `instrumented test`
+  * 에뮬레이터나 실기기에서 돌아간다.
+  * 느리지만 실제 실행과 연관이 깊다.
+  * : <span style = "background-color:#fff5b1">Android Instrumented Tests</span> 사용
+
+* `local test`
   * JVM에서 local하게 돌아간다.
   * 별도의 에뮬레이터나 실기기가 필요하지 않다.
   * 빠르지만 실제 실행과는 차이가 존재한다.
   * : <span style = "background-color:#fff5b1">Android JUnit</span> 사용
-* `local test`
-  * 에뮬레이터나 실기기에서 돌아간다.
-  * 느리지만 실제 실행과 연관이 깊다.
-  * : <span style = "background-color:#fff5b1">Android Instrumented Tests</span> 사용
 
 <br>
 
@@ -73,7 +72,7 @@ class ExampleInstrumentedTest {
     }
 }
 ```
-그렇다면 이 코드를 봐보자! @Test 어노테이션이 없는 것을 통해 우선 위 메소드들과 형태가 다른 것을 확인할 수 있다. 이는 <span style = "background-color:#fff5b1">`Instrumented test`</span>이다. 그렇다면 local test와 Instrumented test를 구분짓는 요소는 무엇일까? 그것은 바로 <span style = "background-color:#fff5b1">`Android Os나 Android Framework code`</span>를 포함하느냐이다. 위 코드를 보면 <span style = "background-color:#fff5b1">Context, InstrumentationRegistry</span>을 사용하는 것을 알 수 있다. 따라서 위 테스트 코드는 Instrumented test에 해당하게 되는 것이다.
+그렇다면 이 코드를 봐보자! 이는 <span style = "background-color:#fff5b1">`Instrumented test`</span>이다. 그렇다면 local test와 Instrumented test를 구분짓는 요소는 무엇일까? 그것은 바로 <span style = "background-color:#fff5b1">`Android Os나 Android Framework code`</span>를 포함하느냐이다. 위 코드를 보면 <span style = "background-color:#fff5b1">Context, InstrumentationRegistry</span>을 사용하는 것을 알 수 있다. 따라서 위 테스트 코드는 Instrumented test에 해당하게 되는 것이다.
 
 ✓여기서 잠깐! 혹시 Insrumented test를 실행하다 다음의 오류를 발견한다면 아래 stackoverflow에 해결법이 나와 있으니 참고하자!
 * <https://stackoverflow.com/questions/71513360/run-android-instrumented-tests-fail>
@@ -83,9 +82,7 @@ class ExampleInstrumentedTest {
 # 👩🏻‍💻 Test 작성 시 고려해야 할 부분
 * 하나의 메소드에 대해 test를 작성하고자 할 때 해당 메소드에서 우클릭을 하면 쉽게 테스트를 추가할 수 있다.
 
-<img src ="https://drive.google.com/uc?id=1UddCMLv2bsUkT1JuAiH4O3JC5nE2LvuZ" width = 500 height = 300>
-
-테스트를 추가할 때 androidTest, Test 소스 세트 중 어디에 추가할 것인지를 고르게 한다. 만약 단순히 계산 결과를 확인하는 것이라면 local test에 해당하겠지만 Android왕 연관된 코드가 들어간다면 instrumented test에 추가해야 할 것이다.
+테스트를 추가할 때 androidTest, Test 소스 세트 중 어디에 추가할 것인지를 고르게 한다. 만약 단순히 계산 결과를 확인하는 것이라면 local test에 해당하겠지만 Android와 연관된 코드가 들어간다면 instrumented test에 추가해야 할 것이다.
 
 * 테스트 이름은 뭘로 해야 할까?
   * (테스트 대상 메소드 이름)_(action이나 input)_(예상하는 결과)
@@ -170,7 +167,7 @@ viewModel에 대해서도 Test를 진행할 수 있다! 그렇다면 Test를 만
 ## ✓ AndroidX Test
 * <span style = "background-color:#fff5b1">local test에서 simulated Android framework class들을 사용 가능하다.</span>
 * local test뿐만 아니라 instrumented test에서도 사용이 가능하다.
-  * 즉, 하나의 코드로 local/instrumented test 모두에서 활용이 가능하며, 환경에 따라 다르게 동작한다.
+  * 즉, 하나의 코드로 local/instrumented test 모두에서 활용이 가능하며, 테스트를 실행하는 주체인 runner를 통해서 환경에 따라 다르게 동작하게 된다.
     * `local test`: <span style = "background-color:#fff5b1">simulated Android environment</span> 활용
     * `instrumented test`: <span style = "background-color:#fff5b1">실제 context</span>를 가져와 실행
 
@@ -188,6 +185,7 @@ testImplementation "org.robolectric:robolectric:$robolectricVersion"
 * 여기서 version은 검색을 통해 최신 버전을 넣어주면 된다.
 * ‼️ 여기서 `robolectric` 라이브러리 같은 경우, <span style = "background-color:#fff5b1">sdk 33을 지원해주는 버전인지를 확인</span>하고 해당 버전으로 설정해준다. 그게 아니라면 버전 오류가 발생한다.
   * `robolectric`은 <span style = "background-color:#fff5b1">local test에서 simulated android environment</span>을 제공해주는 library이다.
+  * AndroidX는 simulated android environment에서 <span style = "background-color:#fff5b1">test 전용 클래스와 메서드를 제공해준다.</span>
 
 
 ```kotlin
@@ -206,9 +204,6 @@ class TasksViewModelTest {
   * test runner는 JUnit 요소로 test runner가 없을 경우, test는 실행될 수 없다.
   * 지정을 안해줄 경우, default runner가 설정되고, `AndroidJUnit4`는 AndroidX Test를 local, instrumented 모두에서 제공하는 test runner이다.
 
-
-즉, 정리를 하면 <span style = "background-color:#fff5b1">단순 local test에서 simulated android environment</span>을 사용하고자 한다면 `AndroidX Test function`을 정의해야 하고, <span style = "background-color:#fff5b1">사용되는 simulated android environment</span>은 `robolectric` 라이브러리에 의해 제공받을 수 있게 되는 것이다!
-
 <br>
 
 # 👩🏻‍💻 LiveData에 Test 적용하기
@@ -222,10 +217,8 @@ LiveData를 test하기 위해서는 크게 두가지 작업을 진행해야 한�
 
 이때 사용할 수 있는 것이 바로 <span style = "background-color:#fff5b1">InstantTaskExecutorRule</span>이다. 이는 내부적으로 <span style = "background-color:#fff5b1">isMainThread 함수에 대해 true</span>를 반환한다.
 
-그 외 추가적인 사항은 다음과 같다.
-
-* JUnit Rule
-*  동일한 쓰레드에서 architecture component와 관련된 백그라운드 작업이 진행돼 동기화에 신경을 쓰지 않아도 되게 된다. 
+(🔗 추가적인 내용 / 2024.05.04)
+viewModel의 postValue를 실행한 후, 값이 바뀌었는지 테스트한다면 <span style = "background-color:#fff5b1">비동기적으로 post되기 전에 test가 실행되기 때문에</span> 테스트에 실패한다. 따라서 이럴 경우, `InstantTaskExecutorRule`을 적용해서 <span style = "background-color:#fff5b1">백그라운드 작업과 연관된 모든 아키텍처 컴포넌트들을 하나의 스레드에서 실행될 수 있도록 해 동기적 처리가 가능하도록 해야 한다.</span>
 
 ```kotlin
 testImplementation "androidx.arch.core:core-testing:$archTestingVersion"
