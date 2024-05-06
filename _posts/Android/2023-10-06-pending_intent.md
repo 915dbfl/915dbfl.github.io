@@ -20,11 +20,11 @@ AlarmManager를 사용하다보면 pendingIntent를 만들어 AlarmManager에게
 
 ## 👩🏻‍💻 PendingIntent 개념 핵심
 
-- 시스템에서 유지하는 토큰 참조
-- 애플리케이션 b에서 a가 살아있는지와는 상관없이 a를 대신에 사전에 정의된 작업을 실행할 수 있도록 pendingIntent를 전달할 수 있다.
+- 사전적 의미: <span style = "background-color:#fff5b1">당장 수행하지는 않고 특정 시점에 수행하는 Intent</span>
+- 역할
+    - pendingIntent를 받은 대상은 <span style = "background-color:#fff5b1">마치 자신의 intent인 것처럼 작업을 수행할 권한을 얻는다.</span>
 
-=> 그렇다! <span style = "background-color:#fff5b1">AlarmManager가 백그라운드 작업</span>이기 때문에 백그라운드 작업에게 pendingIntent를 통해 작업을 넘겨주게 되는 것이다.
-
+=> 그렇다! 앱에서 AlarmManager를 통해 notification을 생성한다면 <span style = "background-color:#fff5b1">이는 앱이 아닌 다른 대상에게 intent를 전달하는 것이기 때문에</span> pendingIntent를 활용하는 것이다.
 <br>
 
 ## 👩🏻‍💻 PendingIntent의 사용 사례: 크게 세가지
@@ -33,9 +33,11 @@ AlarmManager를 사용하다보면 pendingIntent를 만들어 AlarmManager에게
 2. 앱위젯 작업 실행
     - 메인 화면 앱이 Intent 실행
 3. 지정된 시간 - 작업 수행
-    - AndroidManager가 Intent 실행
+    - AlarmManager가 Intent 실행
 
 <br>
+
+위의 사용 사례를 통해 알 수 있듯이, 앱과 상관없이 특정 시점에 다른 누군가가 intent를 수행해주게 할 때 pendingIntent를 활용한다.
 
 ## 👩🏻‍💻 유형에 따른 PendingIntent 생성
 ### 유형에 따른 PendingIntent 생성
@@ -50,14 +52,21 @@ AlarmManager를 사용하다보면 pendingIntent를 만들어 AlarmManager에게
 - service를 시작하는 intent의 경우
     - PendingIntent.getService()
 - broadcastReceiver를 시작하는 Intent의 경우
-    - PendingIntent.getBroadcast
+    - PendingIntent.getBroadcast()
 
 → 각 메서드는 다음 세 개의 인자를 받는다.
 
 - 현재 앱의 context
 - 감싸고자 하는 Intent
-- 인텐트의 적절한 사용방식 Flag
-    - [flag 종류 알아보기](https://developer.android.com/reference/android/app/PendingIntent#summary)
+- 인텐트의 적절한 사용방식 [Flag](https://developer.android.com/reference/android/app/PendingIntent#summary)
+    - FLAG_CANCEL_CURRENT
+        - 이전에 생성한 pendingIntent 취소 후 새로 생성
+    - FLAG_NO_CREATE
+        - 이전에 생성한 pendingIntent 있을 시, 재활용 (없으면 null)
+    - FLAG_ONE_SHOT
+        - 일회성으로 pendingIntent 사용
+    - FLAT_UPDATE_CURRENT
+        - 기존 pendingIntent 업데이트해 사용
 
 <br>
 
