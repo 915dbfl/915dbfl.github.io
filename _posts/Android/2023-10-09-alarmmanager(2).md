@@ -15,6 +15,14 @@ search: true
 
 ## 👩🏻‍💻 AlarmManager
 
+우선 알람 매니저의 특징을 살펴보자!
+
+1. 지정된 시간에 또는 정해진 간격으로 인텐트를 실행한다.
+2. `broadcast receiver`와 함께 사용 -> 다른 작업을 실행할 수 있다.
+3. <span style = "background-color:#fff5b1">애플리케이션 외부에서 작동</span>하므로 앱이 실행 중이 아니거나 절전 모드일 떄도 이벤트를 사용하여 작업을 트리거할 수 있다.
+4. 타이머나 지속적으로 실행되는 서비스에 의존하지 않고 작업할 수 있다.
+
+
 그렇다면 본격적으로 알람 매니저를 사용하는 방법에 대해 다뤄보고자 한다. 사용법이 비교적 매우 간단하다!
 
 그 과정을 정리해보면 다음과 같다.
@@ -30,7 +38,7 @@ search: true
 ```kotlin
 class AlarmReceiver : BroadcastReceiver() {
     override fun onReceive(p0: Context?, p1: Intent?) {
-        // 추후 처리 정의
+        // broadcast를 받고 진행할 처리 작업 정의
     }
 }
 ```
@@ -40,7 +48,7 @@ class AlarmReceiver : BroadcastReceiver() {
 ## 2. broadcast receiver 등록
 
 broadcast receiver를 등록하는 방법은 크게 두 가지가 있다.
-1. manifest에 등록하는 방법
+1. manifest에 등록하는 방법 (정적 등록)
 2. activity에 등록하는 방법
 
 각 방법의 차이점은 <span style = "background-color:#fff5b1">앱이 실행 중이냐</span>에 따라 달라진다.
@@ -99,6 +107,8 @@ broadcast receiver를 등록하는 방법은 크게 두 가지가 있다.
 ## + 등록된 알람 취소하기
 
 구글링을 해본 결과, alarmManager에 등록된 전체 알람을 가져올 방법은 없다. 따라서 <sapn style = "background-color:#fff5b1">등록된 알람을 취소하고자 한다면 등록할 때 만든 것과 동일한 pendingIntent를 만들어 하나하나 취소해야 한다.</span>
+
+필자의 경우에는 등록한 alarmList를 가지고 있다가 취소하는 데 사용했다.
 
 ```kotlin
     fun cancelAllAlarm(context: Context) {
