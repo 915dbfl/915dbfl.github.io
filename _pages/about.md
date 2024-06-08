@@ -7,7 +7,7 @@ toc: true
 toc_sticky: true
 ---
 ## Profile
-<center><img src="../assets/images/youl.jpg" width="30%" height="30%" style="
+<center><img src="../assets/images/youl.jpeg" width="30%" height="30%" style="
 border: 1px solid #93b3b7;
 boarder-radius: 50%;
 padding: 5px;
