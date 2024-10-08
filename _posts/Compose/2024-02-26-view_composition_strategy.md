@@ -55,6 +55,13 @@ search: true
     - [Jetpack Compose Interop: Using Compose in a RecyclerView](https://medium.com/androiddevelopers/jetpack-compose-interop-using-compose-in-a-recyclerview-569c7ec7a583)
 - 해당 전략을 사용할 경우, <span style = "background-color:#fff5b1">pooling container 자체가 창에서 분리되거나 삭제될 때</span> composition이 제거된다.
 
+> [권장되는 사용 시기]
+- ComposeView whether it's the sole element in the View hierarchy, or in the context of a mixed View/Compose screen (not in Fragment).
+  - view 계층에서 ComposeView 하나만이 존재하는 경우
+  - fragment가 아닌 상태에서 View/Compose가 섞인 화면 속에서 사용될 경우
+- ComposeView as an item in a pooling container such as RecyclerView.
+  - recyclerView 안 item의 경우
+
 <br>
 
 ## 🔗 3. DisposeOnLifecycleDestroyed
@@ -64,6 +71,10 @@ search: true
     - view는 detached 되었으나 fragment가 destroy되지 않는 경우가 존재하기 때문이다.
 - ComposeView가 lifecycle과 1:1 관계일 때 적합하다.
 
+> [권장 사용 시기]
+- ComposeView in a Fragment's View.
+  - `fragment 안`에서 ComposeView를 사용할 경우
+
 <br>
 
 ## 🔗 4. DisposeOnViewTreeLifecycleDestroyed
@@ -71,8 +82,41 @@ search: true
 - view가 attach된 이후 <span style = "background-color:#fff5b1">현재의 window의 viewTreeLifecycleOwner가 destroy될 때 composition이 해제된다.</span>
 - composeView를 사용하는 부분에서 <sapn style = "background-color:#fff5b1">lifecycle을 모를 때 사용하면 된다.</span>
 
-- 🔗 해당 전략을 fragment에서도 사용하는 이유?
-    - fragment가 activity lifecycle을 따를 수도 있고 fragment lifecycle을 따를 수도 있기 때문이다. 이렇게 lifecycle을 모를 경우 해당 전략을 사용하면 된다!
+> [권장 사용 시기]
+- ComposeView in Fragment's View.
+  - `fragment 안`에서 ComposeView를 사용할 경우
+- ComposeView in a View wherein the Lifecycle is not known yet.
+  - lifecycle을 잘 모르는 View 속 ComposeView를 사용할 경우
+
+<br>
+
+## 🔗 5. ComposeView in Fragment 상황에서는 어떤 전략을 사용해야 하지??
+
+- composition는 보통 composeView가 window에서 detached될 때 dispose된다.
+    
+- fragment에서 ComposeView를 사용할 경우, 해당 전략이 적절하지 않은 이유
+  1. <span style = "background-color:#fff5b1">fragment View의 생명주기와 일치해야 한다.</span>
+      - compose ui가 state를 저장하기 위해 composition이 `fragment의 view의 lifecycle`을 따라야 한다.
+      - 특히, Compose의 Ui 상태를 저장해야 하는 경우, fragment 생명주기와 맞춰져야 한다.
+  2. <span style = "background-color:#fff5b1">trasition(화면 전환) 중 상태 유지를 해야 한다.</span>
+      - 화면 전환 상태에서 ComposeView가 잠깐 분리되는 순간이 존재한다. 이때 화면에서 분리되었다고 해서 Composition이 해제되면, 중간에 갑자기 UI가 사라지는 문제가 발생할 수 있다.
+      - UI는 화면 전환 과정에서도 계속 보여야 한다.
+
+### 🤔 그렇다면 `DisposeOnLifecycleDestroyed`를 사용해도 되지 않을까?? 
+
+Fragment에는 lifecycle이 크게 두 가지가 존재한다.
+- fragment 자체의 lifecycle
+- fragment의 `view`의 lifecycle
+
+위 두 전략을 비교해본다면 다음과 같다.
+- `DisposeOnLifecycleDestroyed`
+
+  fragment 자체 lifecycle이 소멸될 때 composition이 해제된다. 하지만 fragment view와 fragment의 생명주기는 서로 다르다. 따라서 뷰가 파괴된 상태에서도 composition이 해제되지 않아 메모리 누수나 상태 불일치가 발생할 수 있다.
+
+- `DisposeOnViewTreeLifecycleDestroyed`
+
+  fragment의 <span style = "background-color:#fff5b1">view의 생명주기</span>에 맞춰 composition이 관리되기 때문에 fragment 전환이나 애니메이션 도중 UI가 안전하게 유지될 수 있다.
+
 
 <br>
 
