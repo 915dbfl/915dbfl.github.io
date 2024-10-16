@@ -48,7 +48,7 @@ search: true
 4. `RemoteMediator`(옵션)
 - 계층된 데이터 소스의 페이징을 처리한다.(로컬 데이터베이스 캐시가 존재하는 네트워크 데이터 소스)
 
-<img width="704" alt="스크린샷 2024-10-16 오후 6 08 42" src="https://github.com/user-attachments/assets/80b48e61-0cfc-4bc3-9c34-7feb7eae49b9">
+![image](/assets/images/paging_with_architecture.png)
 
 (각 구성요소가 Android 아키텍처 어느 부분에 존재해야 하는지 한 번 확인해보면 다음과 같다.)
 
@@ -141,7 +141,8 @@ class IssuePagingSource(
 
 그렇다면 PagingSource를 활용해 어떻게 page 데이터가 가져와지는 것일까??
 
-<img width="539" alt="스크린샷 2024-10-16 오후 6 24 20" src="https://github.com/user-attachments/assets/cd7940d7-4ee9-42a1-b84c-143234b6cf93">
+![image](/assets/images/paging_load_data_withy_key.png)
+
 
 그리고 페이지 로드 중 `HttpException`, `IOException` 등을 구분해서 에러 처리를 진행할 수도 있다.
 
