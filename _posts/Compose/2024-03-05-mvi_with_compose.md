@@ -15,60 +15,18 @@ search: true
 ---
 
 # 🔗 들어가며
-최근 기존 프로젝트에 compose를 도입하면서 `상태관리`의 중요성에 대해 몸소 느끼게 되었다. 현재 프로젝트에서는 MVVM 패턴을 사용하고 있는데 state를 필요한 만큼 선언하고 이를 가져와 composable 함수에서 사용하니 <span style = "background-color:#fff5b1">원하지 않은 결과가 화면에 보이거나 불필요한 recomposition이 발생</span>하는 것을 확인할 수 있었다. 
 
-```kotlin
-// 현재 코드
+(내용 수정: 2025.01.04)
 
-@Composable
-fun SuggestionDetailScreen(
-    viewModel: SuggestionDetailViewModel = hiltViewModel(),
-    onBackButtonClick: () -> Unit
-) {
-    val suggestionDetailState by viewModel.detailState.collectAsStateWithLifecycle()
-    val likeSuggestionState by viewModel.likeSuggestionState.collectAsStateWithLifecycle()
-    ...
-}
-```
+최근 기존 프로젝트에 compose를 도입하면서 `상태관리`의 중요성에 대해 몸소 느끼게 되었다. 현재 프로젝트에서는 MVVM 패턴을 사용하고 있는데 state를 필요한 만큼 선언하고 이를 가져와 composable 함수에서 사용하니 <span style = "background-color:#fff5b1">원하지 않은 결과가 화면에 보이거나 불필요한 recomposition이 발생</span>하는 것을 확인할 수 있었다.
 
-화면이 복잡할수록 위와 같이 composable에서 접근하는 state가 많아지게 되는데, 이럴 경우에는 어떻게 상태를 관리해야 불필요한 리소스 낭비를 방지할 수 있을까 고민하게 되었다.
+우선적으로 화면당 하나의 state를 만들어 관리할 경우, 일부 요소만 렌더링 되는 문제를 해결할 수 있었다. 하지만 <span style = "background-color:#fff5b1">단순히 하나의 state만을 만들어 관리할 경우, navigation 전환 / snackbar 띄우기와 같은 단일 이벤트와 상태 변경 이벤트를 경우에 따라 직접 구분해 처리해줘야 한다는 불편함이 존재했다.</span>
 
-안드로이드 개발을 하면서 자주 챙겨보는 `nowinandroid`의 코드를 이것저것 확인해보던 중, 다음과 같이 feature마다 uiState를 정의해 활용하는 것을 볼 수 있었다.
+`MVVM 패턴`에서는 사용자 입력에 따라 어떤 액션을 취할지를 개발자가 직접 판단해 그에 알맞은 presentation logic을 호출해줘야 한다. 하지만 `MVI 패턴`에서는 Intent라는 요소가 사용자 입력에 맞는 액션을 호출함으로써 이벤트에 따라 일관되게 로직을 처리할 수 있다.
 
-```kotlin
-sealed interface OnboardingUiState {
-    /**
-     * The onboarding state is loading.
-     */
-    data object Loading : OnboardingUiState
+compose의 특징 중 하나는 <span style = "background-color:#fff5b1">UDF(단방향 데이터 흐름 - 상태는 아래로만, 이벤트는 위로만 이동한다)이다.</span> 이로 인해 상태는 한 곳에서만 업데이트가 되게 되는데, 이러한 특징은 `MVI 패턴`과 잘 맞는다. 추후 다룰 내용이지만 <span style = "background-color:#fff5b1">MVI 패턴에서는 결국 intent에 의해서만 상태가 변경되기 떄문이다.</span>
 
-    /**
-     * The onboarding state was unable to load.
-     */
-    data object LoadFailed : OnboardingUiState
-
-    /**
-     * There is no onboarding state.
-     */
-    data object NotShown : OnboardingUiState
-
-    /**
-     * There is a onboarding state, with the given lists of topics.
-     */
-    data class Shown(
-        val topics: List<FollowableTopic>,
-    ) : OnboardingUiState {
-        /**
-         * True if the onboarding can be dismissed.
-         */
-        val isDismissable: Boolean get() = topics.any { it.isFollowed }
-    }
-}
-```
-
-해당 부분은 바로 `MVI` 아키텍처가 적용된 부분이다! <span style = "background-color:#fff5b1">compose + MVI</span>을 활용하면 상태를 효과적으로 관리할 수 있다!
-
-그래서 이번 게시글에서는 
+이번 게시글에서는 
 
 1. MVI가 정확히 뭔지?
 2. compose + MVI를 어떻게 적용할 수 있는지?
@@ -78,8 +36,6 @@ sealed interface OnboardingUiState {
 <br>
 
 ## 🔗 MVI의 concept 등장
-
-~~(마크 다운에서 갑자기 구글 드라이브 이미지가 안된다..ㅠㅠ 찾아보니 다른 사람도 같은 이슈를 겪고 있는 것 같아..흑흑 조만간 블로그를 옮기든 해결책을 찾아봐야겠당..)~~
 
 ```
      안녕, B?
@@ -219,7 +175,31 @@ view()🖥️                        intent()🖱️
 - 구현의 복잡성
 - <span style = "background-color:#fff5b1">작은 변경에도 intent를 통한 사이클이 필요하다.</span>
 
+## 🔗 MVI 직접 적용해보며..
+
+우선 MVI 패턴에서는 best practice 코드가 많이 존재하지 않았다. 따라서 참고한 리소스마다 서로 다른 구현 방식을 가지고 있어 어떤 방식이 더 나을지를 스스로 판단해야 했다. 그 중에서도 `orbit`과 같이 별도의 라이브러리를 통해 처리하는 코드도 존재했지만, 필자는 별도의 라이브러리 없이 Channel과 Flow를 활용하여 `State`, `Effect`, `Event`를 직접 구현하는 방식으로 MVI 패턴을 적용해보았다.
+
+결론적으로 기존 MVVM 패턴을 유지하며 event와 effect를 추가적으로 정의한 방식이었는데 그 과정에서 뭔가 새로운 패턴을 적용한다는 느낌보다는 <span style = "background-color:#fff5b1">MVVM에서 이벤트에 따른 상태를 효과적으로 관리하기 위해 추가적인 작업</span>을 진행한다는 느낌이 들었다. <span style = "background-color:#fff5b1">즉, 사용자의 액션을 구분해 Intent로 정의하는 것이 핵심인 것 같다.</span>
+
+(nowinandroid, droidknights 등의 유명한 안드로이드 오픈소스를 살펴본다면 MVI를 적용한 코드를 아직 확인할 수 없다. 화면에서 다루는 하나의 UIState를 구성하고, 단일 이벤트를 처리하는 별도의 변수를 두는 등의 방식으로 상태를 관리하고 있는 것을 확인할 수 있다.)
+
+## 🔗 적용 코드 확인하기 (수정 예정)
+
+[LGTM 프로젝트: SuggestionDetailViewModel 코드](https://github.com/hellokitty-coding-club/LGTM-Android/blob/develop/feature/mission_suggestion/src/main/java/com/lgtm/android/mission_suggestion/ui/detail/SuggestionDetailViewModel.kt)를 본다면 우선 viewModel에서 Input, Output interface를 구현하고 있는 것을 볼 수 있다.
+
+또한, `State`, `Effect`, `Event` 각각에 대해서 왜 해당 구현 방식을 적용하게 되었는지에 대한 내용을 [다음 게시글: [Flow / Channel] Flow, Channel 쓰임새를 알고 잘 활용하기](https://915dbfl.github.io/android/flow_and_channel/)을 통해 확인할 수 있다.
+
+여기서 `Input`은 <span style = "background-color:#fff5b1">사용자 액션을 정의하는 intent에 해당한다.</span> 그리고 outPut은 이러한 사용자 액션으로 발생한 결과(state, uiEffect)를 가지고 있는 interface이다.
+
+사용자 입력이 발생하면 그에 맞는 사용자 액션 정의 intent를 직접 호출한다. 그러면 그에 맞게 로직이 실행되고, 그에 따라 state가 업데이트 되고, effect가 발생하게 된다. 
+
+> 필자의 방식은 MVI 패턴의 간단한 구현 방식 중 하나이다. MVI 패턴을 검색하면 <span style = "background-color:#fff5b1">Reducer(발생한 event를 통해 새로운 상태 갱신)라는 개념</span>이 많이 보이는데 해당 개념이 적용되는 대신 액션에 따른 특정 event를 직접 호출함으로써 reducer의 로직을 event에 따라 분리하였다. 이로 인해 상태 변경 로직이 여러 군데에 존재해 유지 보수의 어려움이 존재한다.
+
+> 대부분의 MVI 패턴 예시 코드를 확인해본다면 `Reducer`가 적용되어 있다. 그 이유는 상태 변경 로직을 한곳으로 둠으로써 유지보수 및 테스트를 용이하게 하기 위함이다. 관련해서 조금 더 학습한 후, 코드 개선을 진행해봐야겠다.
+
+
 ## 🔗 참고자료
 - <https://proandroiddev.com/mvi-a-new-member-of-the-mv-band-6f7f0d23bc8a>
 - <https://medium.com/swlh/mvi-architecture-with-android-fcde123e3c4a>
 - <https://www.charlezz.com/?p=46365>
+- <https://jyotibhambhu.medium.com/implementing-mvi-with-reducers-in-android-a-step-by-step-tutorial-4f23ca426b2f>
