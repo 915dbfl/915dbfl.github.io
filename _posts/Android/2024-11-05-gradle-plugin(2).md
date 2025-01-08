@@ -277,6 +277,8 @@ dependencies {
 }
 ```
 
+`org.gradle.configureondemand=true`에 대한 추가 설명을 조금 더 하자면, gradle의 빌드 과정은 크게 `initialization`, `configuration`, `execution`으로 진행된다. gradle build를 진행하면 모든 프로젝트에 해대 `configuration` 과정에서 각 프로젝트에 필요한 task들에 대한 task graph를 생성한다. <span style = "background-color:#fff5b1">멀티 프로젝트 빌드에서는 모든 프로젝트가 현재 실행하려는 작업과 관련이 있지 않다.</span> 그렇기 때문에 위 코드를 구성함으로써 현재 실행에 관련이 있는 프로젝트만 구성을 하게 된다.
+
 ### 2️⃣ `kotlin-precompiled-script-plugin` 을 별도로 적용해줘야 할까?
 
 - 해당 플러그인은 `kotlin-dsl`에 내장되어 있기 때문에 별도 선언이 필요 없다.
