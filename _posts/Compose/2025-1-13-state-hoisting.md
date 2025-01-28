@@ -162,13 +162,7 @@ class LazyListState @ExperimentalFoundationApi constructor(
 
 > business logic과 state가 관련이 있다면 state를 composition 외부인 viewModel에 둘 수 있다.
 
-만약 `왜 state를 viewModel에 둘 수 있는거지?` 의문이 생긴다면 다음 viewModel의 정의 및 역할을 한번 짚고 넘어가자!
-
-<details>
-
-<summary>우리는 ACC viewModel을 왜 사용할까?</summary>
-
-`AAC ViewModel`의 정의를 가져와봤다.
+만약 `왜 state를 viewModel에 둘 수 있는거지?` 의문이 생긴다면 다음 viewModel의 정의 및 역할을 한번 짚고 넘어가자! 우선 `AAC ViewModel`의 정의를 가져와봤다.
 
 > The [`ViewModel`](https://developer.android.com/reference/androidx/lifecycle/ViewModel) class is a [business logic or screen level state holder](https://developer.android.com/topic/architecture/ui-layer/stateholders). It exposes state to the UI and encapsulates related business logic.
 > 
@@ -178,10 +172,6 @@ class LazyListState @ExperimentalFoundationApi constructor(
 우리는 viewModel을 사용할 때 repository, usecase 등을 주입받아 사용한다. 이를 통해 데이터 / 도메인 레이어 등의 비즈니스 로직을 호출할 수 있게 된다.
 
 그리고 viewModel에 uiDtata를 liveData / flow 등을 활용해 정의해둔다. 그 이유는 viewModel의 lifecycle이 activity보다 더 길어 configuration change와 같은 상황에서 uiData를 효과적으로 유지할 수 있기 때문이다.
-
-</details>
-
-<br>
 
 즉, 위와 같이 business logic과 관련된 state는 viewModel까지 state hositing을 적용하게 된다. 이때 이렇게 viewModel에 정의되어 있는 state가 바로 여기서 말하는 `Screen Ui State`이다.
 
