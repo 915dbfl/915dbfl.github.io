@@ -1,6 +1,6 @@
 ---
-title: "[Android] gradle plugin 활용하기(1)"
-excerpt: "반복되는 build logic 어떻게 처리할 수 있을까? / Script Plugin 적용해보기!"
+title: "[Android] 반복되는 빌드 로직을 어떻게 처리할 수 있을까?"
+excerpt: "Gradle Plugin이란 무엇일까? 적용에 필요한 사전 지식을 차근히 살펴보자!"
 categories:
   - Android
 tag:
@@ -9,9 +9,11 @@ tag:
   - script plugin
   - binary plugin
   - precompiled script plugin
-  - build-logic
+  - composite build
+  - parallel build
+  - build cache
 
-last_modified_at: 2024-11-05
+last_modified_at: 2025-06-20
 toc: true
 toc_sticky: true
 search: true
@@ -113,13 +115,15 @@ plugins {
 }
 ```
 
-## 3) buildSrc vs build-logic
+<br>
 
-gradle plugin을 구성하다 보면 `buildSrc`를 활용하는 코드와 `build-logic` 을 활용하는 코드, 두 가지를 모두 볼 수 있다.
+# 🔗 buildSrc vs build-logic
 
-기존에는 `buildSrc`를 많이 사용하였다. 하지만 `nowinandroid`, `droidknights` 코드를 확인해본다면 plugin을 구성하는 방식에는 차이가 존재하지만 결국 `build-logic`을 활용하고 있는 것을 확인할 수 있다.
+gradle plugin을 구성하다 보면 `buildSrc`를 활용하는 코드와 `build-logic` 을 활용하는 코드, 두 가지를 모두 볼 수 있다. (공식 문서에서 Binary / Precompiled Script Plugin을 적용하는 예시를 본다면 buildSrc가 함께 사용된다.)
 
-### build-logic, buildSrc와 비슷하지 않을까?
+기존에는 `buildSrc`를 많이 사용하였다. 하지만 `nowinandroid`, `droidknights` 코드를 확인해본다면 plugin을 구성하는 방식에는 차이가 존재하지만 결국 `build-logic`을 활용하고 있는 것을 확인할 수 있다. <span style = "background-color:#fff5b1">그렇다면 왜 buildSrc라는 편리한 방식이 존재함에도 불구하고 별도의 모듈을 생성하는 것일까?</span>
+
+## 1. buildSrc란?
 
 buildSrc는 dependency 및 build logic을 관리하는 하나의 기술 중 하나이다. 이는 별도의 외부 파일을 생성하지 않고, `buildSrc` 폴더를 프로젝트 내 만들어 손쉽게 활용할 수 있다.
 
@@ -129,16 +133,30 @@ buildSrc 내부에는 크게 다음의 작업이 가능하다.
 2. dependency 정의 및 관리
 3. build logic 캡슐화
 
-하지만 buildSrc의 경우, <span style = "backgroud-color:#fff5b1">한 줄을 수정할 경우 buildSrc 폴더 내 gradle 파일 전체를 재확인하는 작업을 진행한다.</span> 하지만 `build-logic` 의 경우 증분 옵션을 제공해 수정한 부분만 빌드 반영이 가능해진다.
+하지만 buildSrc의 경우, <span style = "background-color:#fff5b1">한 줄을 수정할 경우 프로젝트 캐시를 무효화 할 가능성 이 있다.</span> 그렇다면 내부적으로 어떻게 동작하길래 한 줄의 수정이 프로젝트 전체 캐시에 영향을 주는 것일까?
 
-### ✔️ 여러 프로젝트에서 빌드 로직을 공유하고 싶다면? build-logic!
+buildSrc를 사용하게 된다면 composite build 형태로 buildSrc 내부 로직이 우선 빌드가 된다. 그리고 이렇게 우선 빌드된 결과들이 실제 사용 위치와 상관없이 <span style = "background-color:#fff5b1">프로젝트의 모든 모듈 속 build 스크립트의 클래스 패스에 추가가 되게 된다.</span> 그렇기 때문에 별도의 처리 없이도 모든 모듈에서 buildSrc 로직에 접근해 활용할 수 있게 된다.
+
+따라서 buildSrc를 사용할 경우, 자동적으로 모든 모듈에서 buildSrc 로직에 대한 의존성을 가지기 때문에 변경사항이 프로젝트 전체에 영향을 미치게 된다.
+
+## 2. 별도의 모듈 생성 + composite build 설정
+
+그렇다면 build-logic과 같이 별도의 모듈을 생성해 직접 `composite build`로 설정하게 된다면 어떻게 될까? 직접 composite build로 설정을 해준다면 <span style = "background-color:#fff5b1">사용하는 곳에만 클래스 패스가 추가되게 된다.</span> 그렇기 때문에 buildSrc와 달리 빌드 로직의 수정이 사용하는 곳에만 영향을 주게 된다.
+
+따라서 buildSrc를 사용하지 않고 별도의 모듈을 활용해 composite build를 적용하게 된다면 불필요하게 프로젝트 캐시가 무효화되는 문제를 예방할 수 있다.
+
+
+## ➕ 여러 프로젝트에서 빌드 로직을 공유하고 싶다면? build-logic!
+
+나아가 <span style = "background-color:#fff5b1">여러 프로젝트에서 빌드 로직을 공유하고 싶을 때도 별도의 모듈을 선언해 활용해야 한다.</span>
 
 ![buildSrc](/assets/images/buildsrc.png)
 
+buildSrc의 경우, 프로젝트마다 하나씩 존재하기 때문에 buildSrc를 사용해 빌드 로직을 공유할 수 없다.
+
 ![build logic](/assets/images/build_logic.png)
 
-- buildSrc의 경우, 프로젝트마다 하나씩 존재하기 때문에 buildSrc를 사용해 빌드 로직을 공유할 수 없다.
-- build-logic 모듈을 활용해 Composite build를 적용해 여러 프로젝트에서 공유하는 build logic을 구성할 수 있게 된다.
+build-logic 모듈을 정의 composite build로 적용하게 된다면 특정 모듈에 종속되는 빌드 로직이 아니다 보니 여러 프로젝트에서 공유하는 build logic을 구성할 수 있게 된다.
 
 | buildSrc | build-logic |
 | --- | --- |
@@ -147,96 +165,67 @@ buildSrc 내부에는 크게 다음의 작업이 가능하다.
 
 <br>
 
-# 🔗 Script Plugin 적용해보기
+# 🔗 Composite Build의 장단점
 
-## 1. 생성
+Composite Build란 독립적으로 개발된 다른 gradle build를 현재 빌드에 포함시키는 역할을 한다. plugin을 정의하는 방식 중 `Binary / Precompiled`를 활용할 경우, 별도의 모듈을 선언해 적용하게 된다면 아래와 같이 composite build 설정을 진행해줘야 한다. 
 
-중복되는 gradle 코드를 별도의 `common.gradle` 파일로 옮겨 groovy 파일을 생성하자.
-
-```kotlin
-// 진행했던 LGTM 프로젝트 common.gradle 파일
-def hasLibraryPlugin = pluginManager.hasPlugin("com.android.library")
-def hasApplicationPlugin = pluginManager.hasPlugin("com.android.application")
-
-if (hasLibraryPlugin || hasApplicationPlugin) {
-    android {
-        compileSdk = libs.versions.compileSdk.get().toInteger()
-        defaultConfig {
-            minSdk = libs.versions.minSdk.get().toInteger()
-
-            if (hasLibraryPlugin) consumerProguardFiles("consumer-rules.pro")
-            testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+```gradle
+pluginManagement {
+    includeBuild("build-logic") // composite build 설정
+    repositories {
+        google {
+            content {
+                includeGroupByRegex("com\\.android.*")
+                includeGroupByRegex("com\\.google.*")
+                includeGroupByRegex("androidx.*")
+            }
         }
-
-        compileOptions {
-            sourceCompatibility = JavaVersion.VERSION_17
-            targetCompatibility = JavaVersion.VERSION_17
-        }
-
-        kotlinOptions {
-            jvmTarget = '17'
-        }
+        mavenCentral()
+        gradlePluginPortal()
     }
 }
 ```
 
-build script 설정에서는 `plugins{}` 를 바로 사용할 수 없다!
-→ 따라서 플러그인을 적용하기 위해 예전에 사용했던 방식인 `apply`를 적용해야 한다.
+이처럼 composite build를 사용하게 된다면 프로젝트 빌드보다 해당 모듈의 빌드 로직이 우선적으로 진행되게 된다. 이러한 특성으로 다음과 같은 장단점이 발생하게 된다.
 
-```kotlin
-apply plugin: 'com.google.dagger.hilt.android'
-```
+- 장점
+    - Binary / Precompiled Script Plugin을 적용하게 된다면 빌드 로직이 우선 빌드돼 `JAR` 형태로 패키징이 되고, 추후 불필요한 재빌드 없이 해당 빌드 결과를 재활용할 수 있게 된다.
+- 단점
+    - 프로젝트 빌드 이전에 우선 빌드가 진행되기 때문에 <span style = "background-color:#fff5b1">초기 빌드 시간이 늘어나게 된다.</span>
 
-## 2. 적용
+모든 기술에는 장단점이 존재하기 때문에 이를 명확히 인식할 필요가 있다. Binary / Precompiled Script Plugin을 적용하면 중복 빌드 로직을 제거하고, 빌드 로직의 재사용성을 높일 수 있다는 장점이 존재한다. 하지만 빌드 로직의 재사용성을 높이는 대신 초기 빌드 시간이 늘어난다는 단점 역시 존재한다. 따라서 이러한 늘어나는 초기 빌드 시간을 줄이기 위해 추가적인 노력이 필요하다.
 
-```kotlin
-// build.gradle.kts :feature:main
+<br>
 
-plugins {
-	//..
-}
+# 🔗 빌드 시간 최소화
 
-apply(from = "common.android.gradle")
+gradle에서는 빌드 시간을 최소화하기 위해 적용할 수 있는 다양한 방식이 존재한다. 대표적으로가 `병렬 빌드`와 `gradle build cache`를 활용하는 방식이다.
 
-dependencies {
-	//...
-}
-```
+## 1. parallel build
 
-script 로직은 `inline` 으로 포함되어 동작한다. 따라서 `apply`를 통해 함수를 사용하듯이 적용할 수 있다. 또한, 중복되는 script를 모아 하나의 script로 제공 가능하다.
+병렬 빌드를 이해하기 위해서는 gradle의 빌드 lifecycle에 대한 이해가 필요하다. 만약 해당 부분에 대한 이해가 필요하다면 다음 게시글의 Gradle Part만 읽어보고 오기를 추천한다. ([[Build] build 그리고 build tool: Gradle](https://915dbfl.github.io/android/build-and-build-tool/))
 
-```kotlin
-// feature 모듈에 적용되는 script를 하나의 파일에 모음
-// common.android.feature.gradle
+Gradle은 크게 초기화 -> 구성 -> 실행 단계를 거치게 된다. 그리고 실행 단계에서는 구성 단계에서 만든 `task graph`를 활용하게 된다. graph를 참고해 task들의 의존성에 따라 실행이 진행되는 것이다.
 
-apply(from = "common.android.gradle")
-apply(from = "common.android.compose.gradle")
-//..
+parallel build에서는 이러한 task graph에서 <span style = "background-color:#fff5b1">의존하지 않는 서로 다른 task들을 병렬적으로 실행하도록 한다.</span> 따라서 자연스럽게 빌드 시간이 단축되는 것이다.
 
-dependecies {
-	impelemtation(project(":core:domain"))
-	impelemtation(project(":core:designsystem"))
-	//..
-}
-```
+## 2. gradle build cache
 
-```kotlin
-// 사용
-apply(from = "coommon.android.feature.gradle")
-```
+gradle build cache의 경우에는 <span style = "background-color:#fff5b1">이전 빌드 태스크의 결과를 가져와 재사용하기 위해 사용된다. 이는 주로 `checkout`이나 `초기 빌드`와 같이 gradle의 증분 빌드가 제대로 적용되지 못하는 상황에서 빌드 속도를 향상시킬 수 있다.
 
-## 3. 특징
+`증분 빌드`라는 것은 gradle에서 기본적으로 제공해주는 기능으로 변경사항이 발생했을 때 그와 관련된 task들만 효과적으로 재빌드하는 과정이다. 이때는 task의 input 달라졌을 때만 해당 task를 재빌드하고, input이 동일하다면 이전 빌드에서의 task 결과를 재사용하게 되는 것이다.
 
-적용해보니 어떤가? 그냥 단순히 중복되는 로직을 별도의 `gradle` 파일에 배치하기만 하면 된다.
+<span style = "background-color:#fff5b1">checkout이나 초기 빌드 상황에서는 이전 빌드가 존재하지 않기 때문에 증분 빌드를 활용할 수 없다. 이러한 상황에서 gradle build cache를 사용한다면 빌드에서의 task 결과값이 저장되어 증분 빌드가 활용될 수 없는 상황에서도 빌드 속도의 효율을 높일 수 있다.</span>
 
-- 가장 단순하고 빠르게 적용할 수 있다.
-- 왜 `groovy`로만 작성을 해야 할까?
-    - `gradle kotlin dsl`은 타입 안전성 제공 → `build.gradle`이라는 파일을 인식 후 빌드
-    - `xxxx.gradle`  형태의 별도의 gradle 파일을 인식하지 못함
+<br>
 
-# 🔗 마무리하며
+# 🔗 Plugin 적용하기
 
-`Script Plugin`을 적용하게 된다면 모듈 속 `build.gradle` 파일의 로직들이 꽤 깔끔해진 것을 확인할 수 있다. 해당 방식은 예전에 많이 사용되었던 방식이다. 로직을 캡슐화하고, 재사용 가능하도록 하는 더 나은 방식 `Binary Plugin`, `PreCompiled Script Plugin`에 대해서도 다음 게시글에서 다뤄보자!
+관련해서는 별도의 게시글을 작성하였다. 전반적인 과정을 중심으로 다뤘으니, 세부적인 코드는 해당 Repo의 build-logic 및 gradle 파일들을 참고하기를 바란다.(모듈별 gradle 파일, settings.gradle 파일)
+
+> [[Android] gradle plugin 활용하기](https://915dbfl.github.io/android/gradle-plugin(2)/)
+
+<br>
 
 # 🔗 참고 자료
 - [https://www.youtube.com/watch?v=7iag6zpGd98](https://www.youtube.com/watch?v=7iag6zpGd98)

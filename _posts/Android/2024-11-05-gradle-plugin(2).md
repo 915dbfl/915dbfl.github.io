@@ -1,6 +1,6 @@
 ---
-title: "[Android] gradle plugin 활용하기(2)"
-excerpt: "Binary Plugin / Precompiled script plugin를 적용해보자!"
+title: "[Android] gradle plugin 활용하기"
+excerpt: "Script / Binary / Precompiled Script Plugin를 적용해보자!"
 categories:
   - Android
 tag:
@@ -11,22 +11,110 @@ tag:
   - precompiled script plugin
   - build-logic
 
-last_modified_at: 2024-11-05
+last_modified_at: 2025-06-20
 toc: true
 toc_sticky: true
 search: true
 ---
 
-## 🔗 들어가며: gradle plugin이 무엇이며, 어떤 방식들이 존재할까?
+# 🔗 들어가며: gradle plugin이 무엇이며, 어떤 방식들이 존재할까?
 
-이전 게시글에서는 `왜 gradle plugin이 필요하며`, gradle plugin을 구성하기 위해서는 어떤 방식들이 존재하는지에 다뤘다.
+이전 게시글에서는 **왜 gradle plugin이 필요하고 gradle plugin을 구성하기 위해서는 어떤 방식들이 존재하는지, 나아가 이를 적용을 위해 필요한 지식들을 추가적으로 짚어보았다.**
 
-단순히 공통되는 빌드 로직을 별도의 gradle 파일로 구성하는 `Script Plugin` 방식에 대해서는 저번 게시글에서 다뤘다.
+이번 게시글에서는 본격적으로 `Script Plugin`, `Binary Plugin`, `Precompiled Script Plugin`을 적용하는 방식에 대해 깊이 다뤄보고자 한다!
 
-이번 게시글에서는 추가적으로 `Binary Plugin`, `Precompiled Script Plugin`을 적용하는 방식에 대해 깊이 다뤄보고자 한다!
+<br>
 
+# 🔗 Script Plugin 적용해보기
 
-## 🔗 Binary Plugin 적용해보기
+## 1. 생성
+
+중복되는 gradle 코드를 별도의 `common.gradle` 파일로 옮겨 groovy 파일을 생성하자.
+
+```kotlin
+// 진행했던 LGTM 프로젝트 common.gradle 파일
+def hasLibraryPlugin = pluginManager.hasPlugin("com.android.library")
+def hasApplicationPlugin = pluginManager.hasPlugin("com.android.application")
+
+if (hasLibraryPlugin || hasApplicationPlugin) {
+    android {
+        compileSdk = libs.versions.compileSdk.get().toInteger()
+        defaultConfig {
+            minSdk = libs.versions.minSdk.get().toInteger()
+
+            if (hasLibraryPlugin) consumerProguardFiles("consumer-rules.pro")
+            testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        }
+
+        compileOptions {
+            sourceCompatibility = JavaVersion.VERSION_17
+            targetCompatibility = JavaVersion.VERSION_17
+        }
+
+        kotlinOptions {
+            jvmTarget = '17'
+        }
+    }
+}
+```
+
+build script 설정에서는 `plugins{}` 를 바로 사용할 수 없다!
+→ 따라서 플러그인을 적용하기 위해 예전에 사용했던 방식인 `apply`를 적용해야 한다.
+
+```kotlin
+apply plugin: 'com.google.dagger.hilt.android'
+```
+
+## 2. 적용
+
+```kotlin
+// build.gradle.kts :feature:main
+
+plugins {
+	//..
+}
+
+apply(from = "common.android.gradle")
+
+dependencies {
+	//...
+}
+```
+
+script 로직은 `inline` 으로 포함되어 동작한다. 따라서 `apply`를 통해 함수를 사용하듯이 적용할 수 있다. 또한, 중복되는 script를 모아 하나의 script로 제공 가능하다.
+
+```kotlin
+// feature 모듈에 적용되는 script를 하나의 파일에 모음
+// common.android.feature.gradle
+
+apply(from = "common.android.gradle")
+apply(from = "common.android.compose.gradle")
+//..
+
+dependecies {
+	impelemtation(project(":core:domain"))
+	impelemtation(project(":core:designsystem"))
+	//..
+}
+```
+
+```kotlin
+// 사용
+apply(from = "coommon.android.feature.gradle")
+```
+
+## 3. 특징
+
+적용해보니 어떤가? 그냥 단순히 중복되는 로직을 별도의 `gradle` 파일에 배치하기만 하면 된다.
+
+- 가장 단순하고 빠르게 적용할 수 있다.
+- 왜 `groovy`로만 작성을 해야 할까?
+    - `gradle kotlin dsl`은 타입 안전성 제공 → `build.gradle`이라는 파일을 인식 후 빌드
+    - `xxxx.gradle`  형태의 별도의 gradle 파일을 인식하지 못함
+
+<br>
+
+# 🔗 Binary Plugin 적용해보기
 
 해당 방식은 위의 `Script Plugin`과는 다르게 `kotlin`을 활용해 플러그인을 구성할 수 있다. `nowinandroid` 프로젝트를 보면 `build-logic` 내부에 해당 `Binary Plugin`이 적용된 것을 확인할 수 있다.
 
@@ -173,7 +261,7 @@ plugins {
 
 <br>
 
-## 🔗 Precompiled Script Plugin 적용해보기
+# 🔗 Precompiled Script Plugin 적용해보기
 
 이제 마지막 방식이다. 위의 `Binary Plugin` 방식을 보니 어떤가? 간단한 빌드 로직을 작성해야 할 경우, 반복해서 클래스를 작성해야 한다는 것은 매우 불편한 작업이다.
 
